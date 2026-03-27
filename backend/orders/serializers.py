@@ -1,6 +1,4 @@
 import datetime
-with open('C:/tmp/module_load.log', 'a') as f:
-    f.write(f"orders.serializers imported at {datetime.datetime.now()}\n")
 
 from rest_framework import serializers
 
