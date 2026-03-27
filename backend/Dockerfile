@@ -20,11 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Collect static files (optional: could be moved to docker-compose command)
-RUN python manage.py collectstatic --noinput -c
-
 # Expose port
 EXPOSE 8000
 
 # Start command
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "core.asgi:application"]
+CMD sh -c "python manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"
