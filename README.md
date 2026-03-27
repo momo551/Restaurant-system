@@ -48,30 +48,25 @@ git push -u origin main
 
 ### ثانياً: النشر (Deployment) خطوة بخطوة
 
-سنقوم برفع **الباك-إند (Django)** على **Render** والأجزاء الأمامية **(React)** على **Vercel**.
+سنقوم برفع **الباك-إند (Django)** على **Railway** والأجزاء الأمامية **(React)** على **Vercel**.
 
-#### 1- رفع الباك-إند على منحة Render مجاناً
-1. افتح موقع [Render.com](https://render.com/) وسجل الدخول باستخدام حساب GitHub الخاص بك.
-2. اضغط على **"New +"** واختر **"Web Service"**.
-3. اربط حساب GitHub واختر المستودع.
-4. **في إعدادات الـ Web Service:**
-   - **Name:** `restaurant-backend`
-   - **Root Directory:** اكتب `backend`
-   - **Environment:** اختر `Python 3`
-   - **Build Command:**
-     ```bash
-     pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
-     ```
-   - **Start Command:**
-     ```bash
-     daphne -b 0.0.0.0 -p $PORT core.asgi:application
-     ```
-5. في **Environment Variables** للقيام بإضافة المتغيرات المطلوبة:
-   - `SECRET_KEY`: اختر أي نص معقد سري.
-   - `DEBUG`: `False`
-   - `ALLOWED_HOSTS`: `*` (مؤقتاً).
-   - `PYTHON_VERSION`: `3.10.0`
-6. سيقوم بالبناء ويعطيك رابط، مثلاً `https://restaurant-backend-xyz.onrender.com`.
+#### 1- رفع الباك-إند مجاناً على Railway
+1. افتح موقع [Railway.app](https://railway.app/) وسجل الدخول باستخدام حساب GitHub الخاص بك.
+2. للبدء، ستظهر لك لوحة التحكم الرئيسية فاضغط على زر **"New Project"**.
+3. اختر **"Deploy from GitHub repo"**.
+4. اختر المستودع الخاص بك (مثل `Restaurant-system`).
+5. **مهم جداً (Root Directory):** بمجرد أن يظهر المشروع في واجهة Railway، اضغط عليه، واذهب إلى الإعدادات (**Settings**)، ثم تحت قسم **Service**، ابحث عن الحقل المسمى **Root Directory** واكتب فيه `backend`، ثم اضغط علامة الصح أو `Save`. (هذا سيجعل Railway يفهم أن الباك-إند كله داخل هذا المجلد).
+6. اذهب إلى قائمة **Variables** (المتغيرات) وأضفها بالضغط على `New Variable` أو `RAW Editor` للصقها جميعاً معاً:
+   ```env
+   SECRET_KEY=vHLPyWbAXJUJ8BivxboHA1zk251LWzQ1wyUxxMgwdCb3dg8ztJ_jNdRRkScAgST40OQ
+   DEBUG=False
+   ALLOWED_HOSTS=*
+   CORS_ALLOWED_ORIGINS=https://localhost:5173
+   SECURE_SSL_REDIRECT=True
+   PYTHON_VERSION=3.10.0
+   ```
+7. ستقوم المنصة تلقائيًا بالبناء والتشغيل بناءً على ملف `Procfile` الذي جهزناه.
+8. اذهب إلى قائمة **Settings** ثم انزل لتجد **Networking**، تحت كلمة **Public Networking** اضغط على **Generate Domain** ليصنع لك رابطاً عاماً لمشروعك (مثلاً: `restaurant-system.up.railway.app`). هذا الرابط هو ما سنستخدمه!
 
 ---
 
@@ -84,16 +79,16 @@ git push -u origin main
    - **Framework Preset:** `Vite`
    - **Root Directory:** اختر ديركتوري سواء `frontend` أو `customer-website`.
 5. في **Environment Variables**:
-   - أضف `VITE_API_URL` وقم بوضع رابط الباك اند الذي حصلت عليه من Render كقيمة لهذا الحقل.
+   - أضف المتغير `VITE_API_URL` وضع فيه قيمة الرابط الخاص بالباك اند من Railway (مثلاً: `https://restaurant-system.up.railway.app`).
 6. اضغط **Deploy**.
 
 ---
 
 ### 🚨 بعد النشر
-لزيادة الحماية، اذهب إلى Render الخاص بالباك إند واستبدل قيمة `ALLOWED_HOSTS` المعمولة بشكل `*` لتكون روابط Vercel.
+لزيادة الحماية، اذهب إلى Railway مجدداً وعدّل قيمة `ALLOWED_HOSTS` المعمولة بشكل `*` لتكون روابط موقع Vercel فقط.
 
 مثال:
-- `ALLOWED_HOSTS` = `restaurant-backend.onrender.com,restaurant-admin.vercel.app`
+- `ALLOWED_HOSTS` = `restaurant-system.up.railway.app,restaurant-admin.vercel.app`
 - `CORS_ALLOWED_ORIGINS` = `https://restaurant-admin.vercel.app,https://restaurant-customer.vercel.app`
 
 مبروك! مشروعك الآن يعمل بالكامل! 🚀
