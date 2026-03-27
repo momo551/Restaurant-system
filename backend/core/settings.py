@@ -83,15 +83,44 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            # Uses Redis DB 3 (separate from Broker=0, Results=1, Cache=2)
-            "hosts": [config('REDIS_URL', default='redis://127.0.0.1:6379/3')],
+# Caching with Redis (Fallback to InMemory if no REDIS_URL provided)
+REDIS_URL = config('REDIS_URL', default='')
+
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
         },
-    },
-}
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL.replace('/0', '/2') if '/0' in REDIS_URL else REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL.replace('/0', '/1') if '/0' in REDIS_URL else REDIS_URL
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
+    }
+    # Dummy broker to prevent crashes
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -125,18 +154,6 @@ DATABASES = {
     )
 }
 
-# Caching with Redis
-REDIS_URL = config('REDIS_URL', default='redis://127.0.0.1:6379/0')
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL.replace('/0', '/2'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
-}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
