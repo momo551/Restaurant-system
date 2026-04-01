@@ -64,7 +64,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
             'preparation_time', 'display_order', 'created_at', 'updated_at',
             'active_offer',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'production_cost', 'created_at', 'updated_at']
 
 
 class CategorySerializer(serializers.ModelSerializer):
