@@ -238,14 +238,23 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "https://restaurant-system-alpha.vercel.app",
-    "https://restaurant-system-git-main-momo551s-projects.vercel.app",
-    "https://restaurant-system-24b4n8nqc-momo551s-projects.vercel.app",
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https:\/\/restaurant-system-.*\.vercel\.app$",
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
 ]
 
 # Celery Settings
