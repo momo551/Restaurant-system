@@ -1,8 +1,8 @@
 FROM python:3.10-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Set work directory
 WORKDIR /app
@@ -24,4 +24,4 @@ COPY . .
 EXPOSE 8000
 
 # Start command
-CMD sh -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && python create_admin.py && python seed_demo_data.py && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate --noinput && python create_admin.py && python seed_demo_data.py && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]

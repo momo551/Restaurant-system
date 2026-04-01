@@ -14,9 +14,15 @@ export default function KDSPage() {
         let reconnectTimeout = null;
 
         const connectWebSocket = () => {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const apiBase = import.meta.env.VITE_API_URL || '';
+            const isSecure = apiBase.startsWith('https') || window.location.protocol === 'https:';
+            const protocol = isSecure ? 'wss:' : 'ws:';
+            
+            // Clean the protocol from the base URL to get the domain
+            const wsDomain = apiBase.replace(/^https?:\/\//, '') || window.location.host;
+            const wsUrl = `${protocol}//${wsDomain}/ws/kds/`;
+            
             const token = localStorage.getItem('access_token');
-            const wsUrl = `${protocol}//${window.location.host}/ws/kds/`;
             
             // Pass token in subprotocol to hide it from the URL/Console logs
             ws = new WebSocket(wsUrl, token ? ['token', token] : undefined);
