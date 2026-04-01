@@ -22,7 +22,7 @@ const MenuPage = () => {
     const fetchMenu = async () => {
         try {
             const response = await publicApi.getMenu();
-            setCategories(response.data);
+            setCategories(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error('Error fetching menu:', error);
         } finally {

@@ -10,7 +10,7 @@ export const useOfferStore = create((set, get) => ({
         if (get().loaded) return;
         try {
             const res = await publicApi.getOffers();
-            const raw = res.data || [];
+            const raw = Array.isArray(res.data) ? res.data : [];
             const map = {};
             raw.forEach(offer => {
                 map[offer.product] = offer;
