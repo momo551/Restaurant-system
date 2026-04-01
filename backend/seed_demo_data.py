@@ -50,9 +50,11 @@ def seed_data():
             number=i,
             defaults={'capacity': 4, 'floor': 1, 'status': 'available', 'position_x': 10 * i, 'position_y': 20}
         )
-        if created:
-            QRCode.objects.create(table=table, code=uuid.uuid4())
-            print(f"Created Table {i} with QR Code.")
+        QRCode.objects.get_or_create(
+            table=table,
+            defaults={'code': uuid.uuid4()}
+        )
+        print(f"Created Table {i} with QR Code.")
 
     print("Data seeded successfully!")
 
