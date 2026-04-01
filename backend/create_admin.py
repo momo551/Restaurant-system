@@ -5,26 +5,91 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
+from users.models import ModulePermission
 
-def create_default_admin():
+def setup_production():
     User = get_user_model()
-    # Using the credentials that the admin usually logs in with
-    # You can change these inside Railway environment variables later!
-    admin_email = os.environ.get('DEFAULT_ADMIN_EMAIL', 'admin@restaurant.com')
-    admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'admin123')
+    default_password = os.environ.get('DEFAULT_PASS', 'Pass1234')
     
-    if not User.objects.filter(email=admin_email).exists():
-        # Django requires a username, so we'll just extract it from email
-        username = admin_email.split('@')[0]
-        print(f"Creating default admin account: {admin_email}")
-        User.objects.create_superuser(
-            email=admin_email,
-            username=username,
-            password=admin_password
-        )
-        print("Admin account created successfully!")
-    else:
-        print("Admin account already exists.")
+    # 1. User Roles & Accounts Mapping
+    accounts = [
+        {'username': 'admin', 'email': 'owner@restaurant.com', 'role': 'owner'},
+        {'username': 'manager', 'email': 'manager@restaurant.com', 'role': 'manager'},
+        {'username': 'cashier', 'email': 'cashier@restaurant.com', 'role': 'cashier'},
+        {'username': 'kitchen', 'email': 'kitchen@restaurant.com', 'role': 'kitchen'},
+        {'username': 'delivery', 'email': 'delivery@restaurant.com', 'role': 'delivery'},
+        {'username': 'hr', 'email': 'hr@restaurant.com', 'role': 'hr'},
+        {'username': 'stock_manager', 'email': 'stock@restaurant.com', 'role': 'inventory_manager'},
+        {'username': 'hall_manager', 'email': 'hall@restaurant.com', 'role': 'hall_manager'},
+        {'username': 'captain', 'email': 'captain@restaurant.com', 'role': 'hall_captain'},
+    ]
+
+    print("--- Creating Production Accounts ---")
+    for acc in accounts:
+        if not User.objects.filter(username=acc['username']).exists():
+            print(f"Creating {acc['role']} account: {acc['username']}")
+            User.objects.create_user(
+                username=acc['username'],
+                email=acc['email'],
+                password=default_password,
+                role=acc['role'],
+                is_staff=True,
+                is_superuser=(acc['role'] == 'owner')
+            )
+        else:
+            print(f"Account {acc['username']} already exists.")
+
+    # 2. Permissions Matrix Setup
+    # Modules from App.jsx
+    all_modules = [
+        ('dashboard', 'لوحة التحكم'),
+        ('menu', 'إدارة المنيو'),
+        ('loyalty', 'الولاء والعملاء'),
+        ('tables', 'تنسيق الطاولات'),
+        ('orders', 'قائمة الطلبات'),
+        ('kds', 'شاشة المطبخ'),
+        ('pos', 'نقطة البيع POS'),
+        ('delivery_monitor', 'مراقبة التوصيل'),
+        ('staff', 'إدارة الموظفين'),
+        ('reports', 'التقارير'),
+        ('delivery_agent', 'حساب الطيار'),
+        ('ingredients', 'المكونات'),
+        ('suppliers', 'الموردين'),
+        ('recipes', 'الوصفات'),
+        ('inventory_movements', 'حركة المخزن'),
+        ('low_stock', 'تنبيهات نقص المخزون'),
+        ('waste_management', 'إدارة الهالك'),
+        ('menu_analytics', 'تحليلات المنيو'),
+        ('staff_performance', 'أداء الموظفين'),
+        ('audit_log', 'سجل النشاطات'),
+        ('permissions_matrix', 'مصفوفة الصلاحيات'),
+    ]
+
+    # Permission Rules
+    rules = {
+        'owner': [m[0] for m in all_modules],
+        'manager': ['dashboard', 'menu', 'loyalty', 'reports', 'menu_analytics', 'staff_performance'],
+        'inventory_manager': ['ingredients', 'suppliers', 'recipes', 'inventory_movements', 'low_stock', 'waste_management'],
+        'cashier': ['pos', 'orders'],
+        'kitchen': ['orders', 'kds'],
+        'delivery': ['delivery_agent'],
+        'hall_manager': ['dashboard', 'tables', 'orders', 'pos', 'delivery_monitor', 'reports', 'staff_performance'],
+        'hall_captain': ['tables', 'orders', 'pos'],
+        'hr': ['staff', 'reports', 'staff_performance', 'audit_log', 'permissions_matrix'],
+    }
+
+    print("\n--- Seeding Permissions Matrix ---")
+    for role, allowed_modules in rules.items():
+        for module_key, module_label in all_modules:
+            is_allowed = module_key in allowed_modules
+            ModulePermission.objects.update_or_create(
+                role=role,
+                module_key=module_key,
+                defaults={'module_label': module_label, 'allowed': is_allowed}
+            )
+        print(f"Applied permissions mapping for role: {role}")
+
+    print("\nProduction setup completed successfully!")
 
 if __name__ == '__main__':
-    create_default_admin()
+    setup_production()
