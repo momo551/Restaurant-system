@@ -27,12 +27,18 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         cache_key = 'active_menu_categories'
-        cached_data = cache.get(cache_key)
-        if cached_data:
-            return Response(cached_data)
+        try:
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                return Response(cached_data)
+        except Exception:
+            pass # Fallback to DB if cache fails
         
         response = super().list(request, *args, **kwargs)
-        cache.set(cache_key, response.data, 60 * 15) # Cache for 15 minutes
+        try:
+            cache.set(cache_key, response.data, 60 * 15) # Cache for 15 minutes
+        except Exception:
+            pass
         return response
 
     def perform_create(self, serializer):

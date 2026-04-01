@@ -26,6 +26,11 @@ db.sqlite3.bak
 .env.production.local
 .env.production
 
+# Redis and Scratch
+dump.rdb
+*.rdb
+my.py
+
 # IDEs and Editors
 .vscode/
 .idea/
