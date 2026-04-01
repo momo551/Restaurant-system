@@ -132,6 +132,12 @@ export default function MenuManagement() {
             data.append('image', imageFile);
         }
 
+        if (!formData.category) {
+            alert('يرجى اختيار الفئة أولاً.');
+            setSubmitting(false);
+            return;
+        }
+
         try {
             if (editingItem) {
                 await api.patch(`/menu/items/${editingItem.id}/`, data, {
@@ -146,7 +152,19 @@ export default function MenuManagement() {
             handleCloseModal();
         } catch (err) {
             console.error('Error saving menu item', err);
-            alert('حدث خطأ أثناء حفظ الصنف. يرجى المحاولة مرة أخرى.');
+            const errorData = err.response?.data;
+            if (errorData) {
+                // Formatting error messages from DRF
+                const messages = Object.entries(errorData)
+                    .map(([key, rawValue]) => {
+                        const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+                        return `${key}: ${value}`;
+                    })
+                    .join('\n');
+                alert(`خطأ في البيانات:\n${messages}`);
+            } else {
+                alert('حدث خطأ غير متوقع أثناء حفظ الصنف.');
+            }
         } finally {
             setSubmitting(false);
         }
