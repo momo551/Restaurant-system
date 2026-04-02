@@ -58,6 +58,7 @@
 # admin@restaurant.com
 #  AdminPass123!
 
+
 # لسه الموقع بتاع العميل 
 # لسه الصاله 
 # اتاكدمن قاعده البيانات في railway 
