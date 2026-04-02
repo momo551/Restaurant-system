@@ -245,22 +245,15 @@ SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "https://restaurant-system-alpha.vercel.app",
-    "https://restaurant-system-production-77a8.up.railway.app",
-    "http://localhost:3000",
-    "http://localhost:5173",
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'content-disposition',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://restaurant-system-alpha.vercel.app",
     "https://restaurant-system-production-77a8.up.railway.app",
-]
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'content-disposition',
 ]
 
 # Axes Security Settings
