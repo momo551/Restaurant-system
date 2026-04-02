@@ -38,3 +38,30 @@ class KDSConsumer(AsyncWebsocketConsumer):
     async def order_update(self, event):
         # Send message to WebSocket
         await self.send(text_data=json.dumps(event["data"]))
+
+
+class OrderTrackingConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.order_number = self.scope['url_route']['kwargs']['order_number']
+        self.group_name = f"order_{self.order_number}"
+
+        # Join the order-specific group
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Leave the group
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(
+                self.group_name,
+                self.channel_name
+            )
+
+    # Receive status update specifically for this order
+    async def order_status_update(self, event):
+        # Send message back to the customer's WebSocket
+        await self.send(text_data=json.dumps(event["data"]))

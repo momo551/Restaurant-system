@@ -16,6 +16,7 @@ const TrackingPage = () => {
     const { clearSession } = useSessionStore();
 
     const lastStatus = useRef(null);
+    const socketRef = useRef(null);
 
     useEffect(() => {
         if (orderNumber && phone) {
@@ -24,40 +25,70 @@ const TrackingPage = () => {
 
         // Request notification permission on first load
         notificationUtil.requestPermission();
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.close();
+            }
+        };
     }, []);
 
-    // Polling for updates
+    // WebSocket for real-time updates
     useEffect(() => {
-        let interval;
-        if (order && !['served', 'cancelled', 'delivered'].includes(order.delivery_status || order.status)) {
-            interval = setInterval(async () => {
-                try {
-                    const res = await publicApi.trackOrder(order.order_number, order.customer_phone);
-                    const newOrder = res.data;
-
-                    // Check for status change to notify
-                    if (lastStatus.current && lastStatus.current !== newOrder.delivery_status) {
-                        if (newOrder.delivery_status === 'out_for_delivery') {
-                            notificationUtil.show('الطلب في الطريق! 🛵', `طلبك رقم ${newOrder.order_number} خرج للتوصيل الآن.`);
-                        } else if (newOrder.delivery_status === 'delivered') {
-                            notificationUtil.show('بالهنا والشفا! ✅', `تم توصيل طلبك بنجاح.`);
-                        }
-                    }
-
-                    lastStatus.current = newOrder.delivery_status;
-                    setOrder(newOrder);
-
-                    // Clear session if order is finished
-                    if (['served', 'delivered'].includes(newOrder.status)) {
-                        clearSession();
-                    }
-                } catch (err) {
-                    console.error('Polling error:', err);
-                }
-            }, 10000); // 10 seconds
+        if (!order || ['served', 'cancelled', 'delivered'].includes(order.status)) {
+            if (socketRef.current) socketRef.current.close();
+            return;
         }
-        return () => clearInterval(interval);
-    }, [order]);
+
+        const connectWebSocket = () => {
+            const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            const protocol = apiBase.startsWith('https') ? 'wss:' : 'ws:';
+            const wsDomain = apiBase.replace(/^https?:\/\//, '');
+            const wsUrl = `${protocol}//${wsDomain}/ws/track/${order.order_number}/`;
+
+            const ws = new WebSocket(wsUrl);
+            socketRef.current = ws;
+
+            ws.onmessage = (event) => {
+                const updatedOrder = JSON.parse(event.data);
+                
+                // Show notifications if status changed
+                if (lastStatus.current && lastStatus.current !== updatedOrder.delivery_status) {
+                    if (updatedOrder.delivery_status === 'out_for_delivery') {
+                        notificationUtil.show('الطلب في الطريق! 🛵', `طلبك رقم ${updatedOrder.order_number} خرج للتوصيل الآن.`);
+                    } else if (updatedOrder.delivery_status === 'delivered') {
+                        notificationUtil.show('بالهنا والشفا! ✅', `تم توصيل طلبك بنجاح.`);
+                    }
+                }
+
+                lastStatus.current = updatedOrder.delivery_status;
+                setOrder(updatedOrder);
+
+                // Clear session if order is finished
+                if (['served', 'delivered'].includes(updatedOrder.status)) {
+                    clearSession();
+                    ws.close();
+                }
+            };
+
+            ws.onclose = () => {
+                // Potential reconnection logic if needed
+                console.log('Tracking WebSocket closed');
+            };
+
+            ws.onerror = (err) => {
+                console.error('Tracking WebSocket error:', err);
+            };
+        };
+
+        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
+            connectWebSocket();
+        }
+
+        return () => {
+            if (socketRef.current) socketRef.current.close();
+        };
+    }, [order?.order_number]);
 
     const handleTrack = async (e) => {
         if (e) e.preventDefault();

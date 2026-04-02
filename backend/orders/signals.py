@@ -11,36 +11,55 @@ from stock.models import InventoryMovement
 @receiver(post_save, sender=Order)
 def broadcast_order_update(sender, instance, created, **kwargs):
     channel_layer = get_channel_layer()
-    
-    # Only broadcast if it's a new order or status changed to relevant KDS states
-    # For now, broadcast all updates to keep it simple and reactive
+    if not channel_layer:
+        return
+
+    # Prepare complete order data for broadcasting
     data = {
-        "type": "order_update",
-        "data": {
-            "id": instance.id,
-            "order_number": instance.order_number,
-            "status": instance.status,
-            "order_type": instance.order_type,
-            "table_number": instance.table.number if instance.table else None,
-            "created_at": instance.created_at.isoformat(),
-            "items": [
-                {
-                    "name": item.menu_item.name,
-                    "quantity": item.quantity,
-                    "notes": item.notes
-                } for item in instance.items.all()
-            ]
-        }
+        "id": instance.id,
+        "order_number": instance.order_number,
+        "daily_id": getattr(instance, 'daily_id', None),
+        "status": instance.status,
+        "delivery_status": getattr(instance, 'delivery_status', None),
+        "order_type": instance.order_type,
+        "order_type_display": instance.get_order_type_display() if hasattr(instance, 'get_order_type_display') else instance.order_type,
+        "table_number": instance.table.number if instance.table else None,
+        "created_at": instance.created_at.isoformat(),
+        "total": str(instance.total),
+        "waiting_time": getattr(instance, 'waiting_time', 0),
+        "priority_level": getattr(instance, 'priority_level', 'NORMAL'),
+        "items": [
+            {
+                "name": item.menu_item.name,
+                "quantity": item.quantity,
+                "notes": item.notes,
+                "menu_item_details": {
+                    "name": item.menu_item.name
+                }
+            } for item in instance.items.all()
+        ]
     }
-    
-    if channel_layer:
-        try:
-            async_to_sync(channel_layer.group_send)(
-                "kitchen_display",
-                data
-            )
-        except Exception as e:
-            print(f"WS Broadcast Error: {str(e)}")
+
+    try:
+        # 1. Broadcast to Kitchen Display System (General Group)
+        async_to_sync(channel_layer.group_send)(
+            "kitchen_display",
+            {
+                "type": "order_update",
+                "data": data
+            }
+        )
+
+        # 2. Broadcast to specific customer group (Order Tracking)
+        async_to_sync(channel_layer.group_send)(
+            f"order_{instance.order_number}",
+            {
+                "type": "order_status_update",
+                "data": data
+            }
+        )
+    except Exception as e:
+        print(f"WS Broadcast Error: {str(e)}")
 
 @receiver(pre_save, sender=OrderItem)
 def store_old_quantity(sender, instance, **kwargs):
