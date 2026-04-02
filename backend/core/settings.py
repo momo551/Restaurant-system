@@ -17,13 +17,6 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://restaurant-system-production-77a8.up.railway.app",
-    "https://restaurant-system-alpha.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
-
 # Application definition
 INSTALLED_APPS = [
     'daphne',
@@ -244,25 +237,38 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
-# CORS Settings
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = False
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "authorization",
-    "content-type",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
+# Production Security & CORS
+from corsheaders.defaults import default_headers
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://restaurant-system-alpha.vercel.app",
+    "https://restaurant-system-production-77a8.up.railway.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
 ]
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://restaurant-system-alpha.vercel.app",
+    "https://restaurant-system-production-77a8.up.railway.app",
 ]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'content-disposition',
+]
+
+# Axes Security Settings
+AXES_FAILURE_LIMIT = 10
+AXES_COOLOFF_TIME = timedelta(hours=1)
+AXES_LOCKOUT_TEMPLATE = None
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 
 # Celery Settings
 CELERY_BROKER_URL = REDIS_URL
