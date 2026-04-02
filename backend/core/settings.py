@@ -17,6 +17,13 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://restaurant-system-production-77a8.up.railway.app",
+    "https://restaurant-system-alpha.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+
 # Application definition
 INSTALLED_APPS = [
     'daphne',

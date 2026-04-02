@@ -24,4 +24,4 @@ COPY . .
 EXPOSE 8000
 
 # Start command
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate --noinput && (python create_admin.py || true) && (python seed_demo_data.py || true) && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && (python create_admin.py || true) && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
