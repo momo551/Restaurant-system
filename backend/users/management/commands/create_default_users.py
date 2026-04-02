@@ -31,9 +31,11 @@ class Command(BaseCommand):
                     'email': acc['email'],
                     'role': acc['role'],
                     'is_staff': True,
+                    'is_active': True,
                     'is_superuser': (acc['role'] == 'owner')
                 }
             )
+            user.is_active = True
             user.set_password(default_password)
             user.save()
             
