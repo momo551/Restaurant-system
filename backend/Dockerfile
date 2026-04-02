@@ -20,8 +20,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
+# Collect static files at BUILD time with a dummy SECRET_KEY (safe for build only)
+RUN SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput || true
+
 # Expose port
 EXPOSE 8000
 
-# Start command
-CMD ["sh", "-c", "python manage.py migrate --noinput && (python create_admin.py || true) && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
+# Minimal startup: only migrate then start server
+CMD ["sh", "-c", "python manage.py migrate --noinput && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
