@@ -668,33 +668,44 @@ export default function StaffManagement() {
                         </div>
                         <form onSubmit={handleUpdateEmployee} className="p-6 space-y-4 text-right" dir="rtl">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="md:col-span-2 bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
-                                    <label className="block text-sm font-bold text-orange-700 mb-2">اسم المستخدم للدخول (الـ User Name)</label>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأول</label>
+                                    <input required type="text" value={editEmployeeData.first_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, first_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأخير</label>
+                                    <input required type="text" value={editEmployeeData.last_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, last_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+                                </div>
+                                
+                                <div className="md:col-span-2 border-t border-slate-50 pt-4 mt-2">
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">اسم المستخدم (للدخول بالنظام)</label>
                                     <input 
                                         required 
                                         type="text" 
                                         value={editEmployeeData.username} 
                                         onChange={e => setEditEmployeeData({ ...editEmployeeData, username: e.target.value })} 
-                                        className={`w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-lg font-bold text-slate-800 shadow-sm ${currentUser?.role !== 'owner' ? 'bg-slate-100 cursor-not-allowed border-slate-200 text-slate-400' : 'bg-white'}`} 
+                                        className={`w-full px-4 py-3 rounded-xl border-2 border-slate-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-lg font-bold ${currentUser?.role !== 'owner' ? 'bg-slate-50 text-slate-400' : 'bg-white text-orange-600'}`} 
                                         disabled={currentUser?.role !== 'owner'}
-                                        placeholder="مثلاً: mohamed_123"
+                                        placeholder="اسم الدخول"
                                     />
-                                    {currentUser?.role !== 'owner' ? (
-                                        <p className="text-[10px] text-slate-400 mt-2">عذراً، فقط مالك المطعم يملك صلاحية تغيير اسم الدخول.</p>
-                                    ) : (
-                                        <p className="text-[10px] text-orange-400 mt-2">هذا هو الاسم الذي سيستخدمه الموظف للدخول إلى النظام.</p>
+                                    {currentUser?.role === 'owner' && (
+                                        <p className="text-[10px] text-slate-400 mt-1">هذا هو الاسم الذي يستخدمه الموظف لتسجيل الدخول.</p>
                                     )}
                                 </div>
+
                                 {currentUser?.role === 'owner' && (
                                     <>
+                                        <div className="md:col-span-2 border-t border-slate-50 pt-4">
+                                            <p className="text-xs font-bold text-slate-400 mb-2">تحديث الأمان (اختياري)</p>
+                                        </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">تعيين كلمة مرور جديدة</label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">كلمة مرور جديدة</label>
                                             <input 
                                                 type="password" 
                                                 value={editEmployeeData.password} 
                                                 onChange={e => setEditEmployeeData({ ...editEmployeeData, password: e.target.value })} 
                                                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" 
-                                                placeholder="اتركه فارغاً للحفاظ على الحالية"
+                                                placeholder="الحفاظ على الحالية"
                                             />
                                         </div>
                                         <div>
@@ -708,48 +719,43 @@ export default function StaffManagement() {
                                         </div>
                                     </>
                                 )}
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأول</label>
-                                    <input required type="text" value={editEmployeeData.first_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, first_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+
+                                <div className="md:col-span-2 border-t border-slate-50 pt-4">
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">الدور الوظيفي</label>
+                                    <select required value={editEmployeeData.role} onChange={e => setEditEmployeeData({ ...editEmployeeData, role: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none">
+                                        <option value="owner">مالك المطعم</option>
+                                        <option value="manager">مدير</option>
+                                        <option value="inventory_manager">مدير مخازن</option>
+                                        <option value="hall_manager">مدير صاله</option>
+                                        <option value="hall_captain">كابتن صاله</option>
+                                        <option value="cashier">كاشير</option>
+                                        <option value="kitchen">مطبخ</option>
+                                        <option value="delivery">طيار / مندوب</option>
+                                        <option value="hr">موارد بشرية</option>
+                                    </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأخير</label>
-                                    <input required type="text" value={editEmployeeData.last_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, last_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">رقم الهاتف</label>
+                                    <input type="text" value={editEmployeeData.phone} onChange={e => setEditEmployeeData({ ...editEmployeeData, phone: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">الراتب الأساسي</label>
+                                    <input type="number" value={editEmployeeData.base_salary} onChange={e => setEditEmployeeData({ ...editEmployeeData, base_salary: parseFloat(e.target.value) || 0 })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">الدور الوظيفي</label>
-                                <select required value={editEmployeeData.role} onChange={e => setEditEmployeeData({ ...editEmployeeData, role: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none">
-                                    <option value="owner">مالك المطعم</option>
-                                    <option value="manager">مدير</option>
-                                    <option value="inventory_manager">مدير مخازن</option>
-                                    <option value="hall_manager">مدير صاله</option>
-                                    <option value="hall_captain">كابتن صاله</option>
-                                    <option value="cashier">كاشير</option>
-                                    <option value="kitchen">مطبخ</option>
-                                    <option value="delivery">طيار / مندوب</option>
-                                    <option value="hr">موارد بشرية</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">رقم الهاتف</label>
-                                <input type="text" value={editEmployeeData.phone} onChange={e => setEditEmployeeData({ ...editEmployeeData, phone: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">الراتب الأساسي</label>
-                                <input type="number" value={editEmployeeData.base_salary} onChange={e => setEditEmployeeData({ ...editEmployeeData, base_salary: parseFloat(e.target.value) || 0 })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
-                            </div>
-                            <div className="flex items-center gap-2 py-2">
+                            
+                            <div className="flex items-center gap-2 py-4 border-t border-slate-50">
                                 <input 
                                     type="checkbox" 
                                     id="is_active_edit" 
                                     checked={editEmployeeData.is_active} 
                                     onChange={e => setEditEmployeeData({ ...editEmployeeData, is_active: e.target.checked })}
-                                    className="w-4 h-4 text-orange-500 rounded border-slate-300 focus:ring-orange-500"
+                                    className="w-5 h-5 text-orange-500 rounded border-slate-300 focus:ring-orange-500"
                                 />
-                                <label htmlFor="is_active_edit" className="text-sm font-medium text-slate-700">موظف نشط</label>
+                                <label htmlFor="is_active_edit" className="text-base font-bold text-slate-700">موظف نشط</label>
                             </div>
-                            <button type="submit" className="w-full mt-6 bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-100">
+                            
+                            <button type="submit" className="w-full bg-orange-500 text-white py-4 rounded-xl font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-100 text-lg">
                                 حفظ التغييرات
                             </button>
                         </form>
