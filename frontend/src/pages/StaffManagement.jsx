@@ -39,6 +39,8 @@ export default function StaffManagement() {
     const [resetPasswordData, setResetPasswordData] = useState({ password: '', password_confirm: '' });
     const [editEmployeeData, setEditEmployeeData] = useState({
         username: '',
+        password: '',
+        password_confirm: '',
         first_name: '',
         last_name: '',
         email: '',
@@ -328,6 +330,8 @@ export default function StaffManagement() {
                                                                 setSelectedStaff(person);
                                                                 setEditEmployeeData({
                                                                     username: person.username,
+                                                                    password: '',
+                                                                    password_confirm: '',
                                                                     first_name: person.name.split(' ')[0] || '',
                                                                     last_name: person.name.split(' ').slice(1).join(' ') || '',
                                                                     email: person.email || `staff_${person.id}@restaurant.com`,
@@ -663,27 +667,52 @@ export default function StaffManagement() {
                             </button>
                         </div>
                         <form onSubmit={handleUpdateEmployee} className="p-6 space-y-4 text-right" dir="rtl">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">اسم المستخدم (للدخول)</label>
-                                <input 
-                                    required 
-                                    type="text" 
-                                    value={editEmployeeData.username} 
-                                    onChange={e => setEditEmployeeData({ ...editEmployeeData, username: e.target.value })} 
-                                    className={`w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none ${currentUser?.role !== 'owner' ? 'bg-slate-50 cursor-not-allowed' : ''}`} 
-                                    disabled={currentUser?.role !== 'owner'}
-                                />
-                                {currentUser?.role !== 'owner' && (
-                                    <p className="text-[10px] text-slate-400 mt-1">فقط مالك المطعم يمكنه تعديل اسم المستخدم.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">اسم المستخدم (للدخول)</label>
+                                    <input 
+                                        required 
+                                        type="text" 
+                                        value={editEmployeeData.username} 
+                                        onChange={e => setEditEmployeeData({ ...editEmployeeData, username: e.target.value })} 
+                                        className={`w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none ${currentUser?.role !== 'owner' ? 'bg-slate-50 cursor-not-allowed' : ''}`} 
+                                        disabled={currentUser?.role !== 'owner'}
+                                    />
+                                    {currentUser?.role !== 'owner' && (
+                                        <p className="text-[10px] text-slate-400 mt-1">فقط مالك المطعم يمكنه تعديل اسم المستخدم.</p>
+                                    )}
+                                </div>
+                                {currentUser?.role === 'owner' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">تعيين كلمة مرور جديدة</label>
+                                            <input 
+                                                type="password" 
+                                                value={editEmployeeData.password} 
+                                                onChange={e => setEditEmployeeData({ ...editEmployeeData, password: e.target.value })} 
+                                                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" 
+                                                placeholder="اتركه فارغاً للحفاظ على الحالية"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">تأكيد كلمة المرور</label>
+                                            <input 
+                                                type="password" 
+                                                value={editEmployeeData.password_confirm} 
+                                                onChange={e => setEditEmployeeData({ ...editEmployeeData, password_confirm: e.target.value })} 
+                                                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none"
+                                            />
+                                        </div>
+                                    </>
                                 )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأول</label>
-                                <input required type="text" value={editEmployeeData.first_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, first_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأخير</label>
-                                <input required type="text" value={editEmployeeData.last_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, last_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأول</label>
+                                    <input required type="text" value={editEmployeeData.first_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, first_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأخير</label>
+                                    <input required type="text" value={editEmployeeData.last_name} onChange={e => setEditEmployeeData({ ...editEmployeeData, last_name: e.target.value })} className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none" />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">الدور الوظيفي</label>

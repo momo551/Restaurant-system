@@ -16,21 +16,40 @@ class ModulePermissionSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model."""
     role_display = serializers.CharField(source='get_role_display', read_only=True)
-    permissions = serializers.SerializerMethodField()
-    
+    password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
+    password_confirm = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name',
+            'id', 'username', 'email', 'password', 'password_confirm', 'first_name', 'last_name',
             'role', 'role_display', 'phone', 'monthly_target', 'base_salary',
             'delivery_commission_rate', 'total_commissions', 'is_active', 
             'created_at', 'updated_at', 'permissions'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
-    def get_permissions(self, obj):
-        perms = ModulePermission.objects.filter(role=obj.role)
-        return {p.module_key: p.allowed for p in perms}
+    def validate(self, attrs):
+        password = attrs.get('password')
+        password_confirm = attrs.get('password_confirm')
+        
+        if password or password_confirm:
+            if password != password_confirm:
+                raise serializers.ValidationError({'password_confirm': 'كلمات المرور غير متطابقة'})
+        return attrs
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        validated_data.pop('password_confirm', None)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+            
+        if password:
+            instance.set_password(password)
+            
+        instance.save()
+        return instance
 
     def validate_username(self, value):
         user = self.instance
