@@ -18,6 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
     role_display = serializers.CharField(source='get_role_display', read_only=True)
     password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True, required=False)
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -28,6 +29,10 @@ class UserSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'permissions'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_permissions(self, obj):
+        perms = ModulePermission.objects.filter(role=obj.role)
+        return {p.module_key: p.allowed for p in perms}
 
     def validate(self, attrs):
         password = attrs.get('password')
