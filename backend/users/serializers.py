@@ -32,6 +32,14 @@ class UserSerializer(serializers.ModelSerializer):
         perms = ModulePermission.objects.filter(role=obj.role)
         return {p.module_key: p.allowed for p in perms}
 
+    def validate_username(self, value):
+        user = self.instance
+        if user and user.username != value:
+            request = self.context.get('request')
+            if request and request.user.role != User.Role.OWNER:
+                raise serializers.ValidationError('فقط مالك المطعم يمكنه تغيير اسم المستخدم')
+        return value
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating new users."""
