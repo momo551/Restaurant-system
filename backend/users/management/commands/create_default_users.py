@@ -25,18 +25,22 @@ class Command(BaseCommand):
 
         self.stdout.write('--- Creating Production Accounts ---')
         for acc in accounts:
-            if not User.objects.filter(username=acc['username']).exists():
-                User.objects.create_user(
-                    username=acc['username'],
-                    email=acc['email'],
-                    password=default_password,
-                    role=acc['role'],
-                    is_staff=True,
-                    is_superuser=(acc['role'] == 'owner')
-                )
+            user, created = User.objects.get_or_create(
+                username=acc['username'],
+                defaults={
+                    'email': acc['email'],
+                    'role': acc['role'],
+                    'is_staff': True,
+                    'is_superuser': (acc['role'] == 'owner')
+                }
+            )
+            user.set_password(default_password)
+            user.save()
+            
+            if created:
                 self.stdout.write(self.style.SUCCESS(f"  Created: {acc['username']} ({acc['role']})"))
             else:
-                self.stdout.write(f"  Exists:  {acc['username']}")
+                self.stdout.write(f"  Updated: {acc['username']}")
 
         # Permissions matrix
         all_modules = [
