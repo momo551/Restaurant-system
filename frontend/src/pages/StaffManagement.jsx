@@ -668,18 +668,21 @@ export default function StaffManagement() {
                         </div>
                         <form onSubmit={handleUpdateEmployee} className="p-6 space-y-4 text-right" dir="rtl">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">اسم المستخدم (للدخول)</label>
+                                <div className="md:col-span-2 bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
+                                    <label className="block text-sm font-bold text-orange-700 mb-2">اسم المستخدم للدخول (الـ User Name)</label>
                                     <input 
                                         required 
                                         type="text" 
                                         value={editEmployeeData.username} 
                                         onChange={e => setEditEmployeeData({ ...editEmployeeData, username: e.target.value })} 
-                                        className={`w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 outline-none ${currentUser?.role !== 'owner' ? 'bg-slate-50 cursor-not-allowed' : ''}`} 
+                                        className={`w-full px-4 py-3 rounded-xl border-2 border-orange-200 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none text-lg font-bold text-slate-800 shadow-sm ${currentUser?.role !== 'owner' ? 'bg-slate-100 cursor-not-allowed border-slate-200 text-slate-400' : 'bg-white'}`} 
                                         disabled={currentUser?.role !== 'owner'}
+                                        placeholder="مثلاً: mohamed_123"
                                     />
-                                    {currentUser?.role !== 'owner' && (
-                                        <p className="text-[10px] text-slate-400 mt-1">فقط مالك المطعم يمكنه تعديل اسم المستخدم.</p>
+                                    {currentUser?.role !== 'owner' ? (
+                                        <p className="text-[10px] text-slate-400 mt-2">عذراً، فقط مالك المطعم يملك صلاحية تغيير اسم الدخول.</p>
+                                    ) : (
+                                        <p className="text-[10px] text-orange-400 mt-2">هذا هو الاسم الذي سيستخدمه الموظف للدخول إلى النظام.</p>
                                     )}
                                 </div>
                                 {currentUser?.role === 'owner' && (
