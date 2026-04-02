@@ -26,5 +26,5 @@ RUN SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput || 
 # Expose port
 EXPOSE 8000
 
-# Run migrate, create default users via management command, then start server
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py create_default_users && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
+# Run migrate, reset IP lockouts, create default users, then start server
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py axes_reset && python manage.py create_default_users && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
