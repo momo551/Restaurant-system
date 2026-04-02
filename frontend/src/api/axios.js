@@ -114,9 +114,11 @@ const attemptBackgroundRefresh = async () => {
       console.warn(`[Auth] Background refresh failed (${consecutiveRefreshFailures}/3)`);
 
       if (consecutiveRefreshFailures >= 3) {
-        console.error('[Auth] Persistent refresh failed - clearing tokens');
+        console.error('[Auth] Persistent refresh failed - clearing tokens and redirecting');
         clearTokens();
         consecutiveRefreshFailures = 0;
+        // Force redirect to login to get new tokens
+        window.location.href = '/login';
       } else {
         setTimeout(attemptBackgroundRefresh, 3000);
       }
