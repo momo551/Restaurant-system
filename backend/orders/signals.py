@@ -42,6 +42,7 @@ def broadcast_order_update(sender, instance, created, **kwargs):
 
     try:
         # 1. Broadcast to Kitchen Display System (General Group)
+        print(f"DEBUG: Broadcasting to kitchen_display group for order {instance.order_number}")
         async_to_sync(channel_layer.group_send)(
             "kitchen_display",
             {
@@ -51,6 +52,7 @@ def broadcast_order_update(sender, instance, created, **kwargs):
         )
 
         # 2. Broadcast to specific customer group (Order Tracking)
+        print(f"DEBUG: Broadcasting to order_{instance.order_number} group")
         async_to_sync(channel_layer.group_send)(
             f"order_{instance.order_number}",
             {

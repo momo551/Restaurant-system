@@ -14,12 +14,12 @@ export default function KDSPage() {
         let reconnectTimeout = null;
 
         const connectWebSocket = () => {
-            const apiBase = import.meta.env.VITE_API_URL || '';
+            const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000';
             const isSecure = apiBase.startsWith('https') || window.location.protocol === 'https:';
             const protocol = isSecure ? 'wss:' : 'ws:';
             
             // Clean the protocol from the base URL to get the domain
-            const wsDomain = apiBase.replace(/^https?:\/\//, '') || window.location.host;
+            const wsDomain = apiBase.replace(/^https?:\/\//, '');
             const wsUrl = `${protocol}//${wsDomain}/ws/kds/`;
             
             const token = localStorage.getItem('access_token');
