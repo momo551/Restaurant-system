@@ -27,4 +27,5 @@ RUN SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput || 
 EXPOSE 8000
 
 # Run migrate, reset IP lockouts, create default users, then start server
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py axes_reset && python manage.py create_default_users && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
+# Using || true ensures the server starts even if setup commands fail temporarily
+CMD ["sh", "-c", "python manage.py migrate --noinput && (python manage.py axes_reset || true) && (python manage.py create_default_users || true) && daphne -b 0.0.0.0 -p ${PORT:-8000} core.asgi:application"]
