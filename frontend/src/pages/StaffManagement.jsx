@@ -262,7 +262,7 @@ export default function StaffManagement() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-slate-800">{person.name}</p>
-                                            <p className="text-xs text-slate-400">staff_{person.id}@restaurant.com</p>
+                                            <p className="text-xs text-orange-500 font-medium">@{person.username}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -329,12 +329,12 @@ export default function StaffManagement() {
                                                             onClick={() => {
                                                                 setSelectedStaff(person);
                                                                 setEditEmployeeData({
-                                                                    username: person.username,
+                                                                    username: person.username || '',
                                                                     password: '',
                                                                     password_confirm: '',
-                                                                    first_name: person.name.split(' ')[0] || '',
-                                                                    last_name: person.name.split(' ').slice(1).join(' ') || '',
-                                                                    email: person.email || `staff_${person.id}@restaurant.com`,
+                                                                    first_name: person.first_name || person.name.split(' ')[0] || '',
+                                                                    last_name: person.last_name || person.name.split(' ').slice(1).join(' ') || '',
+                                                                    email: person.email || '',
                                                                     role: person.role,
                                                                     phone: person.phone || '',
                                                                     base_salary: person.base_salary || 0,
