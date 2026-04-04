@@ -345,5 +345,3 @@ if SENTRY_DSN:
         traces_sample_rate=0.2,
         send_default_pii=False,
     )
-   
- 
