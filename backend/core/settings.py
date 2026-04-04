@@ -5,6 +5,7 @@ Django settings for Restaurant Management System.
 from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
+import urllib.parse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -125,11 +126,34 @@ else:
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': config(
-        'DATABASE_URL',
-        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        cast=lambda v: {
+_DB_URL = config('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+
+if _DB_URL.startswith('postgres'):
+    urllib.parse.uses_netloc.append('postgres')
+    urllib.parse.uses_netloc.append('postgresql')
+    _url = urllib.parse.urlparse(_DB_URL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': _url.path[1:],
+            'USER': _url.username,
+            'PASSWORD': _url.password,
+            'HOST': _url.hostname,
+            'PORT': _url.port or 5432,
+            'CONN_MAX_AGE': 60,
+        }
+    }
+elif _DB_URL.startswith('sqlite'):
+    _db_path = _DB_URL.split('///')[-1] if '///' in _DB_URL else 'db.sqlite3'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / _db_path,
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
             'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
             'NAME': config('DB_NAME', default=str(BASE_DIR / 'db.sqlite3')),
             'USER': config('DB_USER', default=''),
@@ -137,22 +161,8 @@ DATABASES = {
             'HOST': config('DB_HOST', default=''),
             'PORT': config('DB_PORT', default=''),
             'CONN_MAX_AGE': 60,
-        } if not v.startswith('sqlite') and not v.startswith('postgres') else (
-            {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / v.split('///')[-1] if '///' in v else BASE_DIR / 'db.sqlite3',
-            } if v.startswith('sqlite') else {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': config('DB_NAME'),
-                'USER': config('DB_USER'),
-                'PASSWORD': config('DB_PASSWORD'),
-                'HOST': config('DB_HOST'),
-                'PORT': config('DB_PORT'),
-                'CONN_MAX_AGE': 60,
-            }
-        )
-    )
-}
+        }
+    }
 
 
 # Password validation
