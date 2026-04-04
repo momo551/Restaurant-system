@@ -23,8 +23,6 @@ COPY . .
 # Collect static files at BUILD time with a dummy SECRET_KEY (safe for build only)
 RUN SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput || true
 
-# Expose port
-EXPOSE 8000
 
 # Run migrate, reset IP lockouts, create default users, then start server
 # Using || true ensures the server starts even if setup commands fail temporarily
