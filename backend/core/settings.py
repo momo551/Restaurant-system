@@ -135,14 +135,15 @@ if _DB_URL.startswith('postgres'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': _url.path[1:],
-            'USER': _url.username,
-            'PASSWORD': _url.password,
-            'HOST': _url.hostname,
+            'NAME': urllib.parse.unquote(_url.path[1:]),
+            'USER': urllib.parse.unquote(_url.username or ''),
+            'PASSWORD': urllib.parse.unquote(_url.password or ''),
+            'HOST': urllib.parse.unquote(_url.hostname or ''),
             'PORT': _url.port or 5432,
             'CONN_MAX_AGE': 60,
         }
     }
+
 elif _DB_URL.startswith('sqlite'):
     _db_path = _DB_URL.split('///')[-1] if '///' in _DB_URL else 'db.sqlite3'
     DATABASES = {
