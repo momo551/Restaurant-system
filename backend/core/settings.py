@@ -4,7 +4,7 @@ Django settings for Restaurant Management System.
 
 from pathlib import Path
 from datetime import timedelta
-from decouple import config, Csv
+from decouple import config
 import urllib.parse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,23 +78,32 @@ ASGI_APPLICATION = 'core.asgi.application'
 # ─── Redis & Channels ─────────────────────────────────────────────────────────
 
 REDIS_URL = config('REDIS_URL', default='')
+_redis_ssl = REDIS_URL.startswith('rediss://')
 
 if REDIS_URL:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {"hosts": [REDIS_URL]},
+            "CONFIG": {
+                "hosts": [{"address": REDIS_URL, "ssl": _redis_ssl}],
+            },
         },
     }
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': REDIS_URL.replace('/0', '/2') if '/0' in REDIS_URL else REDIS_URL,
-            'OPTIONS': {'CLIENT_CLASS': 'django_redis.client.DefaultClient'},
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'CONNECTION_POOL_KWARGS': {'ssl_cert_reqs': None} if _redis_ssl else {},
+            }
         }
     }
     CELERY_BROKER_URL = REDIS_URL
-    CELERY_RESULT_BACKEND = REDIS_URL.replace('/0', '/1') if '/0' in REDIS_URL else REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
+    if _redis_ssl:
+        CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': None}
+        CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': None}
 else:
     CHANNEL_LAYERS = {
         "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
@@ -253,12 +262,11 @@ CSRF_TRUSTED_ORIGINS = [
 # ─── Security ─────────────────────────────────────────────────────────────────
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = False  # Railway بيتعامل مع HTTPS تلقائياً — لا تغير هذا
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_SECONDS = 31536000
