@@ -248,7 +248,11 @@ SIMPLE_JWT = {
 
 from corsheaders.defaults import default_headers
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "https://restaurant-system-alpha.vercel.app",
+    "https://restaurant-system-aalxkj9cp-momo551s-projects.vercel.app",
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-disposition',
@@ -256,6 +260,8 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vercel.app",
+    "https://restaurant-system-alpha.vercel.app",
+    "https://restaurant-system-aalxkj9cp-momo551s-projects.vercel.app",
     "https://restaurant-system-production-77a8.up.railway.app",
 ]
 

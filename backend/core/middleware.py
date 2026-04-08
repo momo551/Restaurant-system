@@ -39,10 +39,9 @@ class TokenAuthMiddleware:
                 # If only one subprotocol is passed and it looks like a JWT
                 token = subprotocols[0]
 
-        # Debug logging to file
-        import datetime
-        with open('C:/tmp/ws_auth.log', 'a') as f:
-            f.write(f"[{datetime.datetime.now()}] WS Attempt: Token={token[:20] if token else 'None'}, Subprotocols={scope.get('subprotocols')}\n")
+        # Debug logging (Removed file write to avoid crashes on non-Windows environments)
+        # To debug on Railway, use standard python logging:
+        # print(f"WS Attempt: Token={token[:20] if token else 'None'}")
 
         if token:
 
