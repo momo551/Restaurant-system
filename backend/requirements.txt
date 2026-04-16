@@ -21,3 +21,4 @@ sentry-sdk[django]>=1.40.0
 django-axes>=6.4.0
 cloudinary>=1.38.0
 django-cloudinary-storage>=0.3.0
+dj-database-url>=2.1.0

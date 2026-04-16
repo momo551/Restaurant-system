@@ -5,7 +5,7 @@ Django settings for Restaurant Management System.
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
-import urllib.parse
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -122,19 +122,14 @@ else:
 _DB_URL = config('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
 
 if _DB_URL.startswith('postgres'):
-    urllib.parse.uses_netloc.append('postgres')
-    urllib.parse.uses_netloc.append('postgresql')
-    _url = urllib.parse.urlparse(_DB_URL)
+    # dj-database-url handles SSL, port, encoding, and conn pooling correctly
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': urllib.parse.unquote(_url.path[1:]),
-            'USER': urllib.parse.unquote(_url.username or ''),
-            'PASSWORD': urllib.parse.unquote(_url.password or ''),
-            'HOST': urllib.parse.unquote(_url.hostname or ''),
-            'PORT': _url.port or 5432,
-            'CONN_MAX_AGE': 60,
-        }
+        'default': dj_database_url.parse(
+            _DB_URL,
+            conn_max_age=60,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
     }
 elif _DB_URL.startswith('sqlite'):
     _db_path = _DB_URL.split('///')[-1] if '///' in _DB_URL else 'db.sqlite3'
