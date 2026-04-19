@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'daphne',
@@ -222,6 +222,14 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '30/minute',
+        'user': '120/minute',
+    },
 }
 
 # ─── JWT ──────────────────────────────────────────────────────────────────────
@@ -280,7 +288,7 @@ AXES_FAILURE_LIMIT = 10
 AXES_COOLOFF_TIME = timedelta(hours=1)
 AXES_LOCKOUT_TEMPLATE = None
 AXES_RESET_ON_SUCCESS = True
-AXES_LOCKOUT_PARAMETERS = ['ip_address']
+AXES_LOCKOUT_PARAMETERS = ['username']
 
 # ─── Celery ───────────────────────────────────────────────────────────────────
 

@@ -55,8 +55,8 @@ class Invoice(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.invoice_number:
-            import datetime, random
-            self.invoice_number = f"INV-{datetime.datetime.now().strftime('%Y%m%d')}-{random.randint(100, 999)}"
+            import datetime, uuid
+            self.invoice_number = f"INV-{datetime.datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
         
         self.tax_amount = self.subtotal * (self.tax_rate / 100)
         self.total_amount = (self.subtotal + self.tax_amount + self.service_charge) - self.discount_amount
@@ -70,15 +70,17 @@ class Invoice(models.Model):
         elif self.is_paid:
             is_new_payment = True
 
-        super().save(*args, **kwargs)
-        
-        if is_new_payment:
-            from orders.models import Order
-            order = self.order
-            order.status = Order.Status.PAID
-            order.save(update_fields=['status'])
-            # Trigger loyalty points update
-            order.update_customer_loyalty()
+        from django.db import transaction
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            
+            if is_new_payment:
+                from orders.models import Order
+                order = self.order
+                order.status = Order.Status.PAID
+                order.save(update_fields=['status'])
+                # Trigger loyalty points update
+                order.update_customer_loyalty()
 
 class Refund(models.Model):
     """Refund record for a paid invoice."""
