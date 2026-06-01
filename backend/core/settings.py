@@ -120,7 +120,8 @@ else:
 # ─── Database ─────────────────────────────────────────────────────────────────
 
 _DB_URL = config('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
-
+print("DATABASE_URL =", _DB_URL)
+print("DEBUG =", DEBUG)
 if _DB_URL.startswith('postgres'):
     # dj-database-url handles SSL, port, encoding, and conn pooling correctly
     DATABASES = {
@@ -128,7 +129,7 @@ if _DB_URL.startswith('postgres'):
             _DB_URL,
             conn_max_age=60,
             conn_health_checks=True,
-            ssl_require=True,
+            ssl_require=not DEBUG,
         )
     }
 elif _DB_URL.startswith('sqlite'):
