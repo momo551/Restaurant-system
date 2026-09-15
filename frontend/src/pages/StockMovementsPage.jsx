@@ -55,13 +55,8 @@ export default function StockMovementsPage() {
     };
 
     useEffect(() => {
-        setPage(1);
         fetchData();
-    }, [filters]);
-
-    useEffect(() => {
-        fetchData();
-    }, [page]);
+    }, [filters, page]);
 
     const handleSaveAdjustment = async (e) => {
         e.preventDefault();
@@ -85,6 +80,7 @@ export default function StockMovementsPage() {
             created_at__gte: '',
             created_at__lte: ''
         });
+        setPage(1);
     };
 
     const stats = [
@@ -208,7 +204,10 @@ export default function StockMovementsPage() {
                     <select
                         className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-bold text-slate-700"
                         value={filters.ingredient}
-                        onChange={(e) => setFilters({ ...filters, ingredient: e.target.value })}
+                        onChange={(e) => {
+                            setFilters({ ...filters, ingredient: e.target.value });
+                            setPage(1);
+                        }}
                     >
                         <option value="">كل المكونات</option>
                         {ingredients.map(ing => (
@@ -226,7 +225,10 @@ export default function StockMovementsPage() {
                         type="date"
                         className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-sans font-bold text-slate-700"
                         value={filters.created_at__gte}
-                        onChange={(e) => setFilters({ ...filters, created_at__gte: e.target.value })}
+                        onChange={(e) => {
+                            setFilters({ ...filters, created_at__gte: e.target.value });
+                            setPage(1);
+                        }}
                     />
                 </div>
 
@@ -239,7 +241,10 @@ export default function StockMovementsPage() {
                         type="date"
                         className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-sans font-bold text-slate-700"
                         value={filters.created_at__lte}
-                        onChange={(e) => setFilters({ ...filters, created_at__lte: e.target.value })}
+                        onChange={(e) => {
+                            setFilters({ ...filters, created_at__lte: e.target.value });
+                            setPage(1);
+                        }}
                     />
                 </div>
 

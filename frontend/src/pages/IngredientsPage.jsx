@@ -186,7 +186,10 @@ export default function IngredientsPage() {
                         placeholder="بحث سريع عن مكون..."
                         className="w-full pr-12 pl-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-orange-500/10 outline-none text-right font-bold text-slate-700 transition-all shadow-inner"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setPage(1);
+                        }}
                     />
                 </div>
 
