@@ -30,4 +30,4 @@ RUN SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput || 
 
 # Run migrate, reset IP lockouts, create default users, then start server
 # Using || true ensures the server starts even if setup commands fail temporarily
-CMD ["sh", "-c", "echo STARTING && until python manage.py migrate --noinput; do echo 'Database not ready, retrying in 5 seconds...'; sleep 5; done && python manage.py collectstatic --noinput && daphne -b 0.0.0.0 -p $PORT core.asgi:application"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && daphne -b 0.0.0.0 -p $PORT core.asgi:application"]
