@@ -25,6 +25,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Collect static files at BUILD time with a dummy SECRET_KEY (safe for build only)
-RUN SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput || true
-
+RUN echo "Railway runtime image updated"
 CMD ["sh", "-c", "until python manage.py migrate --noinput; do echo 'Database not ready, retrying in 5 seconds...'; sleep 5; done; echo 'Database ready - starting Daphne'; exec daphne -b 0.0.0.0 -p $PORT core.asgi:application"]
