@@ -13,6 +13,14 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+]
+CORS_ALLOW_CREDENTIALS = True
+
 INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
@@ -36,7 +44,6 @@ INSTALLED_APPS = [
     'stock',
     'django_filters',
     'loyalty',
-    'django_celery_beat',
     'cloudinary_storage',
     'cloudinary',
 ]
@@ -75,47 +82,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application'
 
-# ─── Redis & Channels ─────────────────────────────────────────────────────────
+# ─── Channels & Caching ───────────────────────────────────────────────────────
 
-REDIS_URL = config('REDIS_URL', default='')
-_redis_ssl = REDIS_URL.startswith('rediss://')
-
-if REDIS_URL:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [{"address": REDIS_URL, "ssl": _redis_ssl}],
-            },
-        },
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+}
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
-    CACHES = {
-        'default': {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': REDIS_URL,
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-                'CONNECTION_POOL_KWARGS': {'ssl_cert_reqs': None} if _redis_ssl else {},
-            }
-        }
-    }
-    CELERY_BROKER_URL = REDIS_URL
-    CELERY_RESULT_BACKEND = REDIS_URL
-    if _redis_ssl:
-        CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': None}
-        CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': None}
-else:
-    CHANNEL_LAYERS = {
-        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
-    }
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'unique-snowflake',
-        }
-    }
-    CELERY_BROKER_URL = 'memory://'
-    CELERY_RESULT_BACKEND = 'cache+memory://'
+}
 
 # ─── Database ─────────────────────────────────────────────────────────────────
 
@@ -252,10 +229,14 @@ SIMPLE_JWT = {
 
 from corsheaders.defaults import default_headers
 
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "https://restaurant-system-alpha.vercel.app",
     "https://restaurant-system-aalxkj9cp-momo551s-projects.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -289,23 +270,7 @@ AXES_FAILURE_LIMIT = 10
 AXES_COOLOFF_TIME = timedelta(hours=1)
 AXES_LOCKOUT_TEMPLATE = None
 AXES_RESET_ON_SUCCESS = True
-AXES_LOCKOUT_PARAMETERS = ['username']
-
-# ─── Celery ───────────────────────────────────────────────────────────────────
-
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = TIME_ZONE
-
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'check-low-stock-every-10-min': {
-        'task': 'stock.tasks.check_low_stock',
-        'schedule': 600,
-    },
-}
+AXES_LOCKOUT_PARAMETERS = ['username', 'ip_address']
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 

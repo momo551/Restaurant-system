@@ -41,15 +41,11 @@ export default function IngredientsPage() {
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
-            setPage(1);
             fetchIngredients();
         }, 500);
         return () => clearTimeout(delayDebounceFn);
-    }, [searchTerm]);
+    }, [searchTerm, page]);
 
-    useEffect(() => {
-        fetchIngredients();
-    }, [page]);
 
     const handleOpenModal = (ing = null) => {
         if (ing) {
