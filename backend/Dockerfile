@@ -27,7 +27,4 @@ COPY . .
 # Collect static files at BUILD time with a dummy SECRET_KEY (safe for build only)
 RUN SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput || true
 
-
-# Run migrate, reset IP lockouts, create default users, then start server
-# Using || true ensures the server starts even if setup commands fail temporarily
-CMD ["sh", "-c", "echo '=== BEFORE MIGRATE ===' && python manage.py migrate --noinput && echo '=== BEFORE DAPHNE ===' && daphne -b 0.0.0.0 -p $PORT core.asgi:application"]
+CMD ["sh", "-c", "until python manage.py migrate --noinput; do echo 'Database not ready, retrying in 5 seconds...'; sleep 5; done; echo 'Database ready - starting Daphne'; exec daphne -b 0.0.0.0 -p $PORT core.asgi:application"]
