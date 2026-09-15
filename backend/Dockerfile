@@ -26,4 +26,4 @@ COPY . .
 
 # Collect static files at BUILD time with a dummy SECRET_KEY (safe for build only)
 RUN echo "Railway runtime image updated"
-CMD ["sh", "-c", "until python manage.py migrate --noinput; do echo 'Database not ready, retrying in 5 seconds...'; sleep 5; done; echo 'Database ready - starting Daphne'; exec daphne -b 0.0.0.0 -p $PORT core.asgi:application"]
+CMD ["sh", "-c", "echo '=== CONTAINER CMD WORKS ==='; sleep 30"]
